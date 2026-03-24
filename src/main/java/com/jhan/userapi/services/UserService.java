@@ -1,5 +1,7 @@
-package com.jhan.userapi;
+package com.jhan.userapi.services;
 
+import com.jhan.userapi.models.User;
+import com.jhan.userapi.repositorys.UserRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 

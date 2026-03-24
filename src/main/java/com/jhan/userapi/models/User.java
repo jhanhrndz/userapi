@@ -1,4 +1,4 @@
-package com.jhan.userapi;
+package com.jhan.userapi.models;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.jhan.userapi;
+package com.jhan.userapi.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

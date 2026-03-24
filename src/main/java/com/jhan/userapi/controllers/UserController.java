@@ -1,5 +1,7 @@
-package com.jhan.userapi;
+package com.jhan.userapi.controllers;
 
+import com.jhan.userapi.models.User;
+import com.jhan.userapi.services.UserService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
