@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Env
+.env
+
+# Java
+*.class
+
+# Config sensible
+application.properties
