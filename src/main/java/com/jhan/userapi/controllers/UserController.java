@@ -2,6 +2,7 @@ package com.jhan.userapi.controllers;
 
 import com.jhan.userapi.models.User;
 import com.jhan.userapi.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user){
+    public User createUser(@Valid @RequestBody User user){
         return userService.createUser(user);
     }
 
@@ -36,7 +37,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User userDetails){
+    public User updateUser(@PathVariable Long id, @Valid @RequestBody User userDetails){
         return userService.updateUser(id, userDetails);
     }
 }

@@ -1,5 +1,6 @@
 package com.jhan.userapi.services;
 
+import com.jhan.userapi.exceptions.UserNotFoundException;
 import com.jhan.userapi.models.User;
 import com.jhan.userapi.repositorys.UserRepository;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,13 @@ public class UserService {
     }
 
     public User getUserById(Long id){
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public void deleteUser(Long id){
-        userRepository.deleteById(id);
+        User user = getUserById(id);
+        userRepository.delete(user);
     }
 
     public User updateUser(Long id, User userDetails){
