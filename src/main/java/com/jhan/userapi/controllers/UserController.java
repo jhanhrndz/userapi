@@ -1,5 +1,7 @@
 package com.jhan.userapi.controllers;
 
+import com.jhan.userapi.dto.UserRequestDTO;
+import com.jhan.userapi.dto.UserResponseDTO;
 import com.jhan.userapi.models.User;
 import com.jhan.userapi.services.UserService;
 import jakarta.validation.Valid;
@@ -17,17 +19,17 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user){
-        return userService.createUser(user);
+    public UserResponseDTO createUser(@Valid @RequestBody UserRequestDTO dto){
+        return userService.createUser(dto);
     }
 
     @GetMapping
-    public List<User> getAllUsers(){
+    public List<UserResponseDTO> getAllUsers(){
         return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id){
+    public UserResponseDTO getUser(@PathVariable Long id){
         return userService.getUserById(id);
     }
 
@@ -37,7 +39,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @Valid @RequestBody User userDetails){
-        return userService.updateUser(id, userDetails);
+    public UserResponseDTO updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO dto){
+        return userService.updateUser(id, dto);
     }
 }
