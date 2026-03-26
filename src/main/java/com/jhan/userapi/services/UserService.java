@@ -19,7 +19,8 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(UserRequestDTO dto) {
-        existsUser(dto);
+        if (userRepository.existsByUsername(dto.getUsername())) throw new DuplicateResourceException("Username already in use.");
+        if (userRepository.existsByEmail(dto.getEmail())) throw new DuplicateResourceException("Email already in use.");
 
         User user = new User();
         user.setUsername(dto.getUsername());
@@ -61,7 +62,8 @@ public class UserService {
     }
 
     public UserResponseDTO updateUser(Long id, UserRequestDTO dto){
-        existsUser(dto);
+        if (userRepository.existsByUsernameAndIdNot(dto.getUsername(), id)) throw new DuplicateResourceException("Username already in use.");
+        if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) throw new DuplicateResourceException("Email already in use.");
 
         User user = findUserEntityById(id);
         user.setUsername(dto.getUsername());
@@ -78,10 +80,5 @@ public class UserService {
     private User findUserEntityById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
-    }
-
-    private void existsUser(UserRequestDTO dto){
-        if (userRepository.existsByUsername(dto.getUsername())) throw new DuplicateResourceException("Username already in use.");
-        if (userRepository.existsByEmail(dto.getEmail())) throw new DuplicateResourceException("Email already in use.");
     }
 }
