@@ -1,16 +1,16 @@
 package com.jhan.userapi.dto;
 
-import lombok.Getter;
+import com.jhan.userapi.models.Role;
 
-@Getter
-public class UserResponseDTO {
-    private final Long id;
-    private final String username;
-    private final String email;
+import java.time.LocalDateTime;
 
-    public UserResponseDTO(Long id, String username, String email) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-    }
-}
+public record UserResponseDTO(
+        Long id,
+        String username,
+        String email,
+        String firstName,
+        String lastName,
+        Role role,
+        LocalDateTime createdAt,
+        LocalDateTime updateAt
+) { }
