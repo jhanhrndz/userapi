@@ -2,6 +2,7 @@ package com.jhan.userapi.services;
 
 import com.jhan.userapi.dto.UserRequestDTO;
 import com.jhan.userapi.dto.UserResponseDTO;
+import com.jhan.userapi.exceptions.DuplicateResourceException;
 import com.jhan.userapi.exceptions.UserNotFoundException;
 import com.jhan.userapi.models.User;
 import com.jhan.userapi.repositorys.UserRepository;
@@ -18,6 +19,9 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(UserRequestDTO dto) {
+        if (userRepository.existsByUsername(dto.getUsername())) throw new DuplicateResourceException("Username already in use.");
+        if (userRepository.existsByEmail(dto.getEmail())) throw new DuplicateResourceException("Email already in use.");
+
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
