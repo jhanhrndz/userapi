@@ -2,6 +2,8 @@ package com.jhan.userapi.controllers;
 
 import com.jhan.userapi.dto.UserRequestDTO;
 import com.jhan.userapi.dto.UserResponseDTO;
+import com.jhan.userapi.dto.UserUpdatePasswordDTO;
+import com.jhan.userapi.dto.UserUpdateRequestDTO;
 import com.jhan.userapi.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -46,8 +48,15 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserResponseDTO updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO dto){
-        return userService.updateUser(id, dto);
+    @PreAuthorize("hasRole('ADMIN') or @userSecurity.isOwner(authentication, #id)")
+    public UserResponseDTO updateProfile(@PathVariable Long id, @Valid @RequestBody UserUpdateRequestDTO dto){
+        return userService.updateProfile(id, dto);
+    }
+
+    @PutMapping("/{id}/password")
+    @PreAuthorize("hasRole('ADMIN') or @userSecurity.isOwner(authentication, #id)")
+    public ResponseEntity<Void> updatePassword(@PathVariable Long id, @Valid @RequestBody UserUpdatePasswordDTO dto){
+        userService.updatePassword(id, dto);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -39,4 +39,13 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
         return response;
     }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, Object> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 400);
+        response.put("message", ex.getMessage());
+        return response;
+    }
 }

@@ -2,7 +2,10 @@ package com.jhan.userapi.services;
 
 import com.jhan.userapi.dto.UserRequestDTO;
 import com.jhan.userapi.dto.UserResponseDTO;
+import com.jhan.userapi.dto.UserUpdatePasswordDTO;
+import com.jhan.userapi.dto.UserUpdateRequestDTO;
 import com.jhan.userapi.exceptions.DuplicateResourceException;
+import com.jhan.userapi.exceptions.InvalidCredentialsException;
 import com.jhan.userapi.exceptions.UserNotFoundException;
 import com.jhan.userapi.models.Role;
 import com.jhan.userapi.models.User;
@@ -48,7 +51,6 @@ public class UserService {
 
     public UserResponseDTO getUserById(Long id){
         User user = findUserEntityById(id);
-
         return mapToResponseDTO(user);
     }
 
@@ -57,7 +59,7 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public UserResponseDTO updateUser(Long id, UserRequestDTO dto){
+    public UserResponseDTO updateProfile(Long id, UserUpdateRequestDTO dto){
         if (userRepository.existsByUsernameAndIdNot(dto.getUsername(), id)) throw new DuplicateResourceException("Username already in use.");
         if (userRepository.existsByEmailAndIdNot(dto.getEmail(), id)) throw new DuplicateResourceException("Email already in use.");
 
@@ -69,6 +71,21 @@ public class UserService {
 
         User updatedUser = userRepository.save(user);
         return mapToResponseDTO(updatedUser);
+    }
+
+    public void updatePassword(Long id, UserUpdatePasswordDTO dto){
+        User user = findUserEntityById(id);
+
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new InvalidCredentialsException("Las contraseñas nuevas no coinciden");
+        }
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("La contraseña actual es incorrecta");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
     }
 
     private User findUserEntityById(Long id) {

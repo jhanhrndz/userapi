@@ -2,6 +2,8 @@ package com.jhan.userapi.controller;
 
 import com.jhan.userapi.AbstractIntegrationTest;
 import com.jhan.userapi.dto.UserRequestDTO;
+import com.jhan.userapi.dto.UserUpdatePasswordDTO;
+import com.jhan.userapi.dto.UserUpdateRequestDTO;
 import com.jhan.userapi.models.Role;
 import com.jhan.userapi.models.User;
 import com.jhan.userapi.repositorys.UserRepository;
@@ -155,11 +157,10 @@ class UserControllerSecurityTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void user_updateUser_returns403() throws Exception {
-        UserRequestDTO request = UserRequestDTO.builder()
+    void user_updateOwnProfile_returns200() throws Exception {
+        UserUpdateRequestDTO request = UserUpdateRequestDTO.builder()
                 .username("updateduser")
                 .email("updated@example.com")
-                .password("NewPass123!")
                 .firstName("Updated")
                 .lastName("User")
                 .build();
@@ -168,7 +169,70 @@ class UserControllerSecurityTest extends AbstractIntegrationTest {
                         .header("Authorization", "Bearer " + userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("updateduser"))
+                .andExpect(jsonPath("$.email").value("updated@example.com"));
+    }
+
+    @Test
+    void user_updateOtherProfile_returns403() throws Exception {
+        UserUpdateRequestDTO request = UserUpdateRequestDTO.builder()
+                .username("hackeduser")
+                .email("hacked@example.com")
+                .firstName("Hacked")
+                .lastName("User")
+                .build();
+
+        mockMvc.perform(put("/users/" + adminUser.getId())
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void user_updateOwnPassword_returns204() throws Exception {
+        UserUpdatePasswordDTO request = UserUpdatePasswordDTO.builder()
+                .currentPassword("UserPass123!")
+                .newPassword("NewPass123!")
+                .confirmPassword("NewPass123!")
+                .build();
+
+        mockMvc.perform(put("/users/" + regularUser.getId() + "/password")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void user_updatePassword_wrongCurrentPassword_returns400() throws Exception {
+        UserUpdatePasswordDTO request = UserUpdatePasswordDTO.builder()
+                .currentPassword("WrongPass123!")
+                .newPassword("NewPass123!")
+                .confirmPassword("NewPass123!")
+                .build();
+
+        mockMvc.perform(put("/users/" + regularUser.getId() + "/password")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    void user_updatePassword_mismatchConfirm_returns400() throws Exception {
+        UserUpdatePasswordDTO request = UserUpdatePasswordDTO.builder()
+                .currentPassword("UserPass123!")
+                .newPassword("NewPass123!")
+                .confirmPassword("DifferentPass123!")
+                .build();
+
+        mockMvc.perform(put("/users/" + regularUser.getId() + "/password")
+                        .header("Authorization", "Bearer " + userToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError());
     }
 
     @Test
