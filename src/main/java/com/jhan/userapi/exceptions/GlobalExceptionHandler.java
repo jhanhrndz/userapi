@@ -1,9 +1,12 @@
 package com.jhan.userapi.exceptions;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -56,6 +59,24 @@ public class GlobalExceptionHandler {
 
         Map<String, Object> response = buildErrorResponse(HttpStatus.BAD_REQUEST, "Error de Validación",
                 "Los datos enviados no son válidos", request, traceId, errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
+        String traceId = generateTraceId();
+        String message = "Cuerpo de la petición inválido o faltante. Se requiere un cuerpo JSON válido.";
+
+        if (ex.getCause() instanceof MismatchedInputException) {
+            message = "Cuerpo de la petición vacío. Se requiere un JSON con los campos requeridos.";
+        } else if (ex.getCause() instanceof InvalidFormatException) {
+            InvalidFormatException ife = (InvalidFormatException) ex.getCause();
+            message = String.format("Formato inválido para el campo '%s'. Valor esperado: %s",
+                    ife.getPath().get(0).getFieldName(), ife.getTargetType().getSimpleName());
+        }
+
+        Map<String, Object> response = buildErrorResponse(HttpStatus.BAD_REQUEST, "Cuerpo de Petición Inválido",
+                message, request, traceId, null);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 

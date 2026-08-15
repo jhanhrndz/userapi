@@ -1,6 +1,7 @@
 package com.jhan.userapi.config;
 
 import com.jhan.userapi.config.handler.CustomAccessDeniedHandler;
+import com.jhan.userapi.config.handler.CustomAuthenticationEntryPoint;
 import com.jhan.userapi.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -23,27 +23,34 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, CustomAccessDeniedHandler accessDeniedHandler) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, 
+                          CustomAccessDeniedHandler accessDeniedHandler,
+                          CustomAuthenticationEntryPoint authenticationEntryPoint) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.accessDeniedHandler = accessDeniedHandler;
+        this.authenticationEntryPoint = authenticationEntryPoint;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, @Lazy AuthenticationManager authenticationManager) throws Exception {
+    public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http, 
+                                                   @Lazy org.springframework.security.authentication.AuthenticationManager authenticationManager) throws Exception {
         http
-            .csrf(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
+            .csrf(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)
+            .formLogin(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)
+            .httpBasic(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/login", "/auth/register", "/auth/reset-password").permitAll()
+                .requestMatchers("/auth/forgot-password").hasRole("ADMIN")
+                .requestMatchers("/auth/**").authenticated()
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)
             )
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(new HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED))
+                .authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler)
             )
             .authenticationManager(authenticationManager)

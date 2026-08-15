@@ -11,6 +11,7 @@ import com.jhan.userapi.services.PasswordResetService;
 import com.jhan.userapi.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -80,6 +81,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
         String token = passwordResetService.createPasswordResetToken(request.getEmail());
 
