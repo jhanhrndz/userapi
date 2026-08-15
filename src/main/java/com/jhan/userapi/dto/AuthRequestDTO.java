@@ -1,6 +1,5 @@
 package com.jhan.userapi.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,20 +11,10 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequestDTO {
+public class AuthRequestDTO {
     @NotBlank
     private String username;
 
     @NotBlank
-    @Email
-    private String email;
-
-    @NotBlank
     private String password;
-
-    @NotBlank
-    private String firstName;
-
-    @NotBlank
-    private String lastName;
 }

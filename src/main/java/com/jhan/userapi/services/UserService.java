@@ -7,6 +7,7 @@ import com.jhan.userapi.exceptions.UserNotFoundException;
 import com.jhan.userapi.models.Role;
 import com.jhan.userapi.models.User;
 import com.jhan.userapi.repositorys.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -14,9 +15,11 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponseDTO createUser(UserRequestDTO dto) {
@@ -26,7 +29,7 @@ public class UserService {
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setRole(Role.USER);
