@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -134,5 +136,24 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error Interno",
                 "Ha ocurrido un error inesperado. Contacte al administrador.", request, traceId, null);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoHandlerFound(NoHandlerFoundException ex, WebRequest request) {
+        String traceId = generateTraceId();
+        String message = String.format("El endpoint %s %s no existe", ex.getHttpMethod(), ex.getRequestURL());
+        Map<String, Object> response = buildErrorResponse(HttpStatus.NOT_FOUND, "Recurso No Encontrado",
+                message, request, traceId, null);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex, WebRequest request) {
+        String traceId = generateTraceId();
+        String message = String.format("Método HTTP %s no soportado para este endpoint. Métodos permitidos: %s",
+                ex.getMethod(), ex.getSupportedHttpMethods());
+        Map<String, Object> response = buildErrorResponse(HttpStatus.METHOD_NOT_ALLOWED, "Método No Permitido",
+                message, request, traceId, null);
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(response);
     }
 }
