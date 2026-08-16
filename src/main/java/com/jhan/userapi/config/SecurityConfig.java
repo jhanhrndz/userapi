@@ -1,5 +1,6 @@
 package com.jhan.userapi.config;
 
+import com.jhan.userapi.config.filter.CustomExceptionTranslationFilter;
 import com.jhan.userapi.config.handler.CustomAccessDeniedHandler;
 import com.jhan.userapi.config.handler.CustomAuthenticationEntryPoint;
 import com.jhan.userapi.security.JwtAuthenticationFilter;
@@ -13,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -53,8 +55,14 @@ public class SecurityConfig {
                 .accessDeniedHandler(accessDeniedHandler)
             )
             .authenticationManager(authenticationManager)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(customExceptionTranslationFilter(), ExceptionTranslationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CustomExceptionTranslationFilter customExceptionTranslationFilter() {
+        return new CustomExceptionTranslationFilter();
     }
 }
